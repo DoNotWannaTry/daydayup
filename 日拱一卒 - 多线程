@@ -16,12 +16,17 @@ Thread.currentThread().interrupt();
 对于Java而言，当 new Thread() 时，线程状态就是 new，当执行 start() 时，就变成了runnable；
 Java中的Runnable状态对应操作系统的Running和Ready状态，也就是说Java中于Runnable状态下的线程可能正在执行，也可能正在等待被分配CPU资源；
 Java 中的Timed Waiting, Waiting, Blocked 统称为阻塞状态，
+
 线程从Runnable进入到Blocked状态只有一种可能，就是进入到synchronized保护的代码中没有获取到monitor锁;
 线程从Runnable进入到 Waiting状态，可能是执行了没有时间参数的， wait(), join(), LockSupport.park()方法（如 ReentrantLock的锁，本质上是调用这个方法）；
 线程从Runnable进入到Timed Waiting 状态，相比上边那个方法参数里增加了时间，增加一个sleep()方法，以及 LockSupport.parkNanos() 和 LockSupport.parkUntil()方法。
 想要从Blocked状态进入到Runnable状态，要求线程获取monitor锁；
-从Waiting进入到Runnable比较特殊，因为Waiting是不限时的，也就说无论过了多
-久它都不会主动恢复，只有当执行了LockSupport.unpark()方法，或join()的线程运行结束｜被中断时，才能进入Runnable状态；如果其他线程调用了notify / notifyAll() 方法来唤醒它，它会直接进入到Blocked状态，因为线程如果调用notify/notifyAll()，首先必须要持有该monitor锁，所以处于Waiting状态的线程拿不到锁，就会直接被Blocked，直到唤醒它的那个线程执行完并释放monitor锁，才能轮到它去抢monitor锁，如果抢到了，就会回到Runnable状态；
+
+从Waiting进入到Runnable比较特殊，因为Waiting是不限时的，也就说无论过了多久它都不会主动恢复，
+只有当执行了LockSupport.unpark()方法，或join()的线程运行结束｜被中断时，才能进入Runnable状态；
+如果其他线程调用了notify / notifyAll() 方法来唤醒它，它会直接进入到Blocked状态，因为线程如果调用notify/notifyAll()，首先必须要持有该monitor锁，
+所以处于Waiting状态的线程拿不到锁，就会直接被Blocked，直到唤醒它的那个线程执行完并释放monitor锁，才能轮到它去抢monitor锁，如果抢到了，就会回到Runnable状态；
+
 Timed Waiting 同理，但是Timed Waiting 时间到了自己就会回到Runnable状态
 
 今天就抄这三个吧，这都记不住呢，
